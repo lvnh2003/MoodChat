@@ -1,6 +1,6 @@
 import Button from "@/components/Button";
 import Input from "@/components/Input";
-import { checkMood } from "@/feature/api/checkMood";
+import { db } from "@/lib/db";
 import { Geist, Geist_Mono } from "next/font/google";
 import { useState } from "react";
 
@@ -17,29 +17,17 @@ const geistMono = Geist_Mono({
 
 export default function Home() {
   const [value, setValue] = useState<string>("");
-  const [mood, setMood] = useState<string>("");
+  // const [mood, setMood] = useState<string>("");
   const handleClick = async() =>{
-    try {
-      const res = await checkMood({text: value});
-      setMood(res.sentiment[0].label)
-    } catch (error) {
-      console.log(error);
-       
-    }
+    await db.set('hello1','hello');
+
+
   }
   return (
     <div
       className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
     >
-     <Input
-        name="text"
-        onChange={(event) => {
-          setValue(event.target.value); 
-        }}
-        value={value}
-      />
-      <Button text="Submit" onClick={handleClick}/>
-      <div>Your mood: {mood}</div>
+      <Button onClick={handleClick} className="" variant={'default'}>Click me</Button>
     </div>
   );
 }
