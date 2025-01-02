@@ -19,7 +19,16 @@ const Page: FC = () => {
       setIsLoading(false)
     }
   }
-
+  
+  async function loginWithGithub() {
+    setIsLoading(true)
+    try {
+      await signIn('github')
+    } catch (error) {
+      console.log(error);
+      toast.error('Something went wrong with your login.')
+    }
+  }
   return (
     <>
       <div className='flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
@@ -66,6 +75,26 @@ const Page: FC = () => {
               </svg>
             )}
             Google
+          </Button>
+          <Button
+            isLoading={isLoading}
+            type='button'
+            className='max-w-sm mx-auto w-full'
+            onClick={loginWithGithub}>
+            {isLoading ? null : (
+              <svg
+              className="mr-2 h-4 w-4"
+              aria-hidden="true"
+              focusable="false"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M12 2a10 10 0 00-3.16 19.49c.5.09.68-.22.68-.48v-1.69c-2.78.61-3.37-1.34-3.37-1.34-.45-1.14-1.11-1.44-1.11-1.44-.91-.62.07-.61.07-.61 1 .07 1.52 1.03 1.52 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.64-1.33-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.26-.45-1.28.1-2.66 0 0 .84-.27 2.75 1.02a9.57 9.57 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.66.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.93.68 1.88v2.79c0 .26.18.58.69.48A10 10 0 0012 2z" />
+            </svg>
+           
+            )}
+            Github
           </Button>
         </div>
       </div>
