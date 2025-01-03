@@ -1,11 +1,17 @@
-import Button from '@/components/Button';
-import {FC} from 'react';
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-interface pageProp{
 
+
+const Page = ({ session }: {session : string}) => {
+  return <pre>{JSON.stringify(session)}</pre>;
+};
+
+export default Page;
+export async function getServerSideProps(context) {
+  const session = await getServerSession(context.req, context.res, authOptions);
+
+  return {
+    props: { session },
+  };
 }
-const page: FC<pageProp> = ({}) => {
-    return <Button>Hello</Button>
-}
-
-export default page;
