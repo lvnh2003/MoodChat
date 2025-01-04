@@ -43,7 +43,6 @@ const AddFriendButton: FC<AddFriendButtonProps> = ({}) =>{
     const onSubmit = (data: FormData) => {
         addFriend(data.email)
     }
-    console.log(errors);
     
     return(
         <form className='max-w-sm' onSubmit={handleSubmit(onSubmit)}>

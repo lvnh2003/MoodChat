@@ -1,5 +1,7 @@
+import FriendRequestsSidebarOption from '@/components/FriendRequestsSidebarOption'
 import { Icon, Icons } from '@/components/Icon'
 import SignOutButton from '@/components/SignOutButton'
+import { fetchRedis } from '@/helper/redis'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -27,6 +29,7 @@ const Layout = ({ children}:LayoutProps) => {
   const [session, setSession] = useState(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [unseenRequestCount, setUnseenRequestCount] = useState<number>();
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -34,6 +37,9 @@ const Layout = ({ children}:LayoutProps) => {
         const data = await response.json();
         if (data) {
           setSession(data);
+          const unseenCount = (await fetchRedis('smembers',`user:${data.user.id}:incoming_friend_requests`) as User[]).length
+
+          setUnseenRequestCount(unseenCount)
         } else {
           router.push('/login');
         }
@@ -46,12 +52,11 @@ const Layout = ({ children}:LayoutProps) => {
     };
 
     fetchSession();
-  }, [router]);
+  }, [router, unseenRequestCount]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
-
   return (
     <div className='w-full flex h-screen'>
       <div className='flex h-full w-full max-w-xs grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6'>
@@ -82,6 +87,9 @@ const Layout = ({ children}:LayoutProps) => {
                 )
               })}
             </ul>
+          </li> 
+          <li>
+            <FriendRequestsSidebarOption sessionId={session?.user?.id} initialUnseenRequestCount={unseenRequestCount}/>
           </li>
           <li className='-mx-6 mt-auto flex items-center'>
               <div className='flex flex-1 items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900'>

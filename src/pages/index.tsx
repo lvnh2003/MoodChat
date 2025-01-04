@@ -1,5 +1,4 @@
 import Button from "@/components/Button";
-import Input from "@/components/Input";
 import { db } from "@/lib/db";
 import { Geist, Geist_Mono } from "next/font/google";
 import { useState } from "react";
@@ -16,8 +15,6 @@ const geistMono = Geist_Mono({
 
 
 export default function Home() {
-  const [value, setValue] = useState<string>("");
-  // const [mood, setMood] = useState<string>("");
   const handleClick = async() =>{
     await db.set('hello1','hello');
 
