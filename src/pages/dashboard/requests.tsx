@@ -60,7 +60,7 @@ const Page = () =>{
 
     return (
         <main className="pt-8">
-            <h1 className="font-bold text-5xl mb-8">Add a friend</h1>
+            <h1 className="font-bold text-5xl mb-8">Friend Requests</h1>
             <div className="flex flex-col gap-4">
                 {incomingFriendRequests? (<FriendRequests 
                     incomingFriendRequests={incomingFriendRequests || []}

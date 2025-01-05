@@ -1,6 +1,9 @@
+import Button from '@/components/Button'
 import FriendRequestsSidebarOption from '@/components/FriendRequestsSidebarOption'
 import { Icon, Icons } from '@/components/Icon'
+import SideBarChatList from '@/components/SideBarChatList'
 import SignOutButton from '@/components/SignOutButton'
+import { getFriendsByUserId } from '@/helper/getFriendsByUserId'
 import { fetchRedis } from '@/helper/redis'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -30,15 +33,15 @@ const Layout = ({ children}:LayoutProps) => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [unseenRequestCount, setUnseenRequestCount] = useState<number>();
+  const [friends, setFriends] = useState<User[]>()
   useEffect(() => {
     const fetchSession = async () => {
       try {
         const response = await fetch('/api/session');
         const data = await response.json();
-        if (data) {
+        if (data.user) {
           setSession(data);
           const unseenCount = (await fetchRedis('smembers',`user:${data.user.id}:incoming_friend_requests`) as User[]).length
-
           setUnseenRequestCount(unseenCount)
         } else {
           router.push('/login');
@@ -54,6 +57,20 @@ const Layout = ({ children}:LayoutProps) => {
     fetchSession();
   }, [router, unseenRequestCount]);
 
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!session) return;
+      try {
+        const data = await getFriendsByUserId(session.user.id);
+        setFriends(data);
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+      }
+    };
+
+    fetchFriends();
+  }, [session]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -63,10 +80,13 @@ const Layout = ({ children}:LayoutProps) => {
         <Link className='flex h-16 shrink-0 items-center' href='/dashboard'>
           <Icons.Logo className='h-8 w-auto text-indigo-600' />
         </Link>
-      <div className='text-xs font-semibold leading-6 text-gray-400'>Your chats</div>
+        {friends?.length > 0 ? (<div className='text-xs font-semibold leading-6 text-gray-400'>Your chats</div>): null}
       <nav className='flex flex-1 flex-col'>
         <ul className='flex flex-1 flex-col gap-y-7' role='list'>
-          <li>Chats that this user has</li>
+          {friends?.length > 0 ? (<li>
+            <SideBarChatList friends={friends} sessionId={session.user.id} />
+          </li>): null}
+          
           <li>
             <div className='text-xs font-semibold leading-6 text-gray-400'>
               Overview

@@ -1,17 +1,13 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { ReactElement } from "react";
+import Layout from "./layout";
 
 
 
-const Page = ({ session }: {session : string}) => {
-  return <pre>{JSON.stringify(session)}</pre>;
+const Page = ({}) => {
+  return <div>Dashboard</div>;
 };
 
 export default Page;
-export async function getServerSideProps(context) {
-  const session = await getServerSession(context.req, context.res, authOptions);
-
-  return {
-    props: { session },
-  };
-}
+Page.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};
