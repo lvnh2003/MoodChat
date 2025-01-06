@@ -4,6 +4,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { addFriendValidator } from "@/lib/validations /add-friend";
 import { fetchRedis } from "@/helper/redis";
 import { db } from "@/lib/db";
+import { pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -44,7 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if(isAlreadyFriend){
       return res.status(400).json({error: "Already friend"})
     }
-
+    
+    pusherServer.trigger(
+      toPusherKey(`user:${idAdd}:incoming_friend_requests`),'incoming_friend_requests',{
+        senderId: session.user.id,
+        senderEmail : session.user.email
+      }
+    )
     db.sadd(`user:${idAdd}:incoming_friend_requests`, session.user.id)
     return res.status(200).json({ message: "Friend added successfully." });
   } catch (error) {

@@ -1,10 +1,18 @@
-import { chatHrefConstructor } from "@/lib/utils"
+import { pusherClient } from "@/lib/pusher"
+import { chatHrefConstructor, toPusherKey } from "@/lib/utils"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import toast, { Toast } from "react-hot-toast"
+import UnseenChatToast from "./UnseenChatToast"
 
 interface SideBarChatListProps{
     friends: User[],
     sessionId: string
+}
+
+interface ExtendedMessage extends Message{ 
+    senderImg: string,
+    senderName : string
 }
 const SideBarChatList = ({friends, sessionId}: SideBarChatListProps) => {
     const [unseenMessages, setUnseenMessages] = useState<Message[]>([])
@@ -18,6 +26,45 @@ const SideBarChatList = ({friends, sessionId}: SideBarChatListProps) => {
             })
         }
     },[pathname])
+
+    useEffect(()=>{
+        pusherClient.subscribe(toPusherKey(`user:${sessionId}:chats`))
+
+        pusherClient.subscribe(toPusherKey(`user:${sessionId}:friends`))
+
+        const chatHandler = (message: ExtendedMessage) => {
+            const showNotify = pathname !== `dashboard/chat/${chatHrefConstructor(sessionId,message.senderId)}`
+            if(!showNotify) return
+
+            toast.custom((t: Toast)=>(
+                <UnseenChatToast 
+                t={t}
+                sessionId={sessionId}
+                senderId={message.senderId} 
+                senderImg={message.senderImg}
+                senderMessage={message.text}
+                senderName={message.senderName} />
+            ))
+
+            setUnseenMessages((prev) => [...prev, message])
+            
+        }
+
+        const newFriendHandler = () => {
+            router.refresh()
+        }
+        pusherClient.bind('new_message',chatHandler)
+        pusherClient.bind('new_friend',newFriendHandler)
+        return () => {
+            pusherClient.unsubscribe(toPusherKey(`user:${sessionId}:chats`))
+
+            pusherClient.unsubscribe(toPusherKey(`user:${sessionId}:friends`))
+
+            pusherClient.unbind('new_message',chatHandler)
+            pusherClient.unbind('new_friend',newFriendHandler)
+
+        }
+    }, [pathname, sessionId, router])
     return (
         <ul role="list" className="max-h-[25rem] overflow-y-auto -mx-2 space-y-1">
 
