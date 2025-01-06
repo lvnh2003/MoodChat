@@ -1,10 +1,11 @@
 import FriendRequests from "@/components/FriendRequests";
 import { fetchRedis } from "@/helper/redis";
-import { FC, ReactElement, useEffect, useState } from "react";
+import {  ReactElement, useEffect, useState } from "react";
 import Layout from "./layout";
+import { Session } from "next-auth";
 
 const Page = () =>{
-    const [session, setSession] = useState(null);
+    const [session, setSession] = useState<Session>();
     const [incomingSenderIds, setIncomingSenderIds] = useState<string[]>()
     const [incomingFriendRequests, setIncomingFriendRequests] = useState<IncomingFriendRequest[]>();
     useEffect(() => {
@@ -62,9 +63,11 @@ const Page = () =>{
         <main className="pt-8">
             <h1 className="font-bold text-5xl mb-8">Friend Requests</h1>
             <div className="flex flex-col gap-4">
-                {incomingFriendRequests? (<FriendRequests 
-                    incomingFriendRequests={incomingFriendRequests || []}
-                    sessionId={session.user.id}/>): (
+                {incomingFriendRequests? (
+                    <FriendRequests 
+                    incomingFriendRequests={incomingFriendRequests}
+                    sessionId={session?.user.id || ""}/>): 
+                    (
                         <p className='text-sm text-zinc-500'>Nothing to show here...</p>
                     )}
             </div>

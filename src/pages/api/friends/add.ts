@@ -1,7 +1,7 @@
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { addFriendValidator } from "@/lib/validations /add-friend";
+import { addFriendValidator } from "@/lib/validations/add-friend";
 import { fetchRedis } from "@/helper/redis";
 import { db } from "@/lib/db";
 import { pusherServer } from "@/lib/pusher";

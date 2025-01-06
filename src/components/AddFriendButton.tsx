@@ -1,13 +1,12 @@
 import {FC, useState} from 'react'
 import Button from './Button';
-import { addFriendValidator } from '@/lib/validations /add-friend';
+import { addFriendValidator } from '@/lib/validations/add-friend';
 import axios, { AxiosError } from 'axios';
 import {z} from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-interface AddFriendButtonProps{}
 type FormData = z.infer<typeof addFriendValidator>
-const AddFriendButton: FC<AddFriendButtonProps> = ({}) =>{
+const AddFriendButton: FC = ({}) =>{
 
     const [successState, setSuccessState] = useState<boolean>(false);
     const  {register , handleSubmit, setError, formState: {errors}} = useForm<FormData>({
@@ -25,22 +24,24 @@ const AddFriendButton: FC<AddFriendButtonProps> = ({}) =>{
 
             setSuccessState(true)
         } catch (error) {
-                if(error instanceof z.ZodError){
-                   setError('email',{message: error.message})
-                   return
-                }
+            setSuccessState(false);
+            if(error instanceof z.ZodError){
+                setError('email',{message: error.message})
+                return
+            }
 
-                if(error instanceof AxiosError){
-                    setError('email',{message: error.response?.data})
-                    return
-                }
-            
-                setError('email',{message:'Something went wrong'})
+            if(error instanceof AxiosError){
+                setError('email',{message: error.response?.data.error})
+                return
+            }
+        
+            setError('email',{message:'Something went wrong'})
             
         }
     }
 
     const onSubmit = (data: FormData) => {
+        setSuccessState(false);
         addFriend(data.email)
     }
     
@@ -54,7 +55,8 @@ const AddFriendButton: FC<AddFriendButtonProps> = ({}) =>{
                 placeholder='example@gmail.com'/>
                 <Button>Add</Button>
             </div>
-            <p className='mt-1 text-sm text-red-600'>{errors.email?.message.error || errors.email?.message}</p>
+            
+            <p className='mt-1 text-sm text-red-600'>{ errors.email?.message}</p>
             {successState? ( <p className='mt-1 text-sm text-green-600'>Friend Request Sent</p>): null}
         </form>
     )

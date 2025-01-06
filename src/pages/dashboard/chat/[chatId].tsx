@@ -1,23 +1,21 @@
 import { fetchRedis } from "@/helper/redis";
 import { db } from "@/lib/db";
-import { messageArrayValidator } from "@/lib/validations /message";
+import { messageArrayValidator } from "@/lib/validations/message";
 import { useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 import Layout from "../layout";
 import Image from "next/image";
 import Messages from "@/components/Messages";
 import ChatInput from "@/components/ChatInput";
+import { Session } from "next-auth";
 
-interface PageProps {
-  params: { chatId: string };
-}
 
 const Page = () => {
  
   
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [chatPartner, setChatPartner] = useState<User>();
-  const [initialMessages, setInitialMessages] = useState<any[]>([]);
+  const [initialMessages, setInitialMessages] = useState<Message[]>([]);
   const router = useRouter();
   const { chatId } = router.query;
   useEffect(() => {
@@ -54,7 +52,7 @@ const Page = () => {
       const chatPartnerId = user.id === userId1 ? userId2 : userId1;
 
       try {
-        const partner = await db.get(`user:${chatPartnerId}`);
+        const partner = await db.get(`user:${chatPartnerId}`) as User;
         setChatPartner(partner);
 
         const results: string[] = await fetchRedis(
@@ -64,7 +62,7 @@ const Page = () => {
           -1
         );
         const dbMessages = results.map((message) => JSON.parse(message));
-        const validatedMessages = messageArrayValidator.parse(dbMessages.reverse());
+        const validatedMessages = messageArrayValidator.parse(dbMessages.reverse()) as Message[];
         setInitialMessages(validatedMessages);
       } catch (error) {
         console.error("Error fetching chat data:", error);
@@ -102,13 +100,13 @@ const Page = () => {
         </div>
       </div>
       <Messages
-        chatId={chatId}
-        chatPartner={chatPartner}
+        chatId={chatId as string}
+        chatPartner={chatPartner as User}
         sessionImg={session.user.image}
         sessionId={session.user.id}
         initialMessages={initialMessages} />
 
-      <ChatInput chatPartner={chatPartner} chatId={chatId}/>
+      <ChatInput chatPartner={chatPartner as User} chatId={chatId as string}/>
     </div>
   );
 };

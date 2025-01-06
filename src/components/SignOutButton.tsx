@@ -1,11 +1,10 @@
-import { ButtonHTMLAttributes, FC, useState } from "react";
+import { FC, useState } from "react";
 import Button from "./Button";
 import { signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 import { Loader2, LogOut } from "lucide-react";
 
-interface SignOutButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>{}
-const SignOutButton: FC<SignOutButtonProps> = ({...props}) => {
+const SignOutButton: FC = ({...props}) => {
     const [isSigningOut, setIsSigninOut] = useState<boolean>(false);
     return (
         <Button {...props} variant={'ghost'} onClick={async()=>{

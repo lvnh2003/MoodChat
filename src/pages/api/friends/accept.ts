@@ -1,7 +1,8 @@
 import { fetchRedis } from "@/helper/redis";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { error } from "console";
+import { pusherServer } from "@/lib/pusher";
+import { toPusherKey } from "@/lib/utils";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
@@ -39,6 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if(!hasFriendRequest){
             return res.status(400).json({error:'No friend request'})
         }
+
+        pusherServer.trigger(toPusherKey(`user:${idAdd}:friends`), 'new_friend', {})
         await db.sadd(`user:${session.user.id}:friends`, idAdd)
 
         await db.sadd(`user:${idAdd}:friends`, session.user.id)

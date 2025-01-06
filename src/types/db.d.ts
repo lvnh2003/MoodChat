@@ -22,3 +22,9 @@ interface FriendRequest{
     senderId: string,
     receiverId: string
 }
+  interface FriendWithLastMessage {
+    id: string;
+    name: string;
+    image: string;
+    lastMessage: Message;
+  }

@@ -13,6 +13,7 @@ const Page: FC = () => {
     } catch (error) {
       // display error message to user
       toast.error('Something went wrong with your login.')
+      console.log(error);
     } finally {
       setIsLoading(false)
     }

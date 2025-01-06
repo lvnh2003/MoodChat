@@ -1,14 +1,15 @@
-import Button from '@/components/Button'
 import FriendRequestsSidebarOption from '@/components/FriendRequestsSidebarOption'
 import { Icon, Icons } from '@/components/Icon'
 import SideBarChatList from '@/components/SideBarChatList'
 import SignOutButton from '@/components/SignOutButton'
 import { getFriendsByUserId } from '@/helper/getFriendsByUserId'
 import { fetchRedis } from '@/helper/redis'
+import { Session } from 'next-auth'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
+import Loading from './loading'
 
 interface LayoutProps {
   children: ReactNode
@@ -29,7 +30,7 @@ const sidebarOption: SidebarOption[] = [
   },
 ]
 const Layout = ({ children}:LayoutProps) => {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<Session | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [unseenRequestCount, setUnseenRequestCount] = useState<number>();
@@ -72,7 +73,7 @@ const Layout = ({ children}:LayoutProps) => {
   }, [session]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading /> ;
   }
   return (
     <div className='w-full flex h-screen'>
@@ -80,11 +81,14 @@ const Layout = ({ children}:LayoutProps) => {
         <Link className='flex h-16 shrink-0 items-center' href='/dashboard'>
           <Icons.Logo className='h-8 w-auto text-indigo-600' />
         </Link>
-        {friends?.length > 0 ? (<div className='text-xs font-semibold leading-6 text-gray-400'>Your chats</div>): null}
+        {friends && friends.length > 0 ? (
+          <div className='text-xs font-semibold leading-6 text-gray-400'>Your chats</div>
+        ) : null}
+
       <nav className='flex flex-1 flex-col'>
         <ul className='flex flex-1 flex-col gap-y-7' role='list'>
-          {friends?.length > 0 ? (<li>
-            <SideBarChatList friends={friends} sessionId={session.user.id} />
+          {friends && friends?.length > 0 ? (<li>
+            <SideBarChatList friends={friends} sessionId={(session?.user.id) as string} />
           </li>): null}
           
           <li>
@@ -109,7 +113,7 @@ const Layout = ({ children}:LayoutProps) => {
             </ul>
           </li> 
           <li>
-            <FriendRequestsSidebarOption sessionId={session?.user?.id} initialUnseenRequestCount={unseenRequestCount}/>
+            <FriendRequestsSidebarOption sessionId={session?.user?.id as string} initialUnseenRequestCount={unseenRequestCount || 0}/>
           </li>
           <li className='-mx-6 mt-auto flex items-center'>
               <div className='flex flex-1 items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900'>
@@ -132,7 +136,7 @@ const Layout = ({ children}:LayoutProps) => {
                 </div>
               </div>
 
-              <SignOutButton className='h-full aspect-square' />
+              <SignOutButton/>
             </li>
 
         </ul>

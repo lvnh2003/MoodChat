@@ -1,5 +1,5 @@
 import AddFriendButton from '@/components/AddFriendButton';
-import {FC, ReactElement} from 'react'
+import {ReactElement} from 'react'
 import Layout from './layout';
 
 const Page = () => {
