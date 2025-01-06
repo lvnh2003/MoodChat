@@ -33,7 +33,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 git clone https://github.com/lvnh2003/moodchat.git
-cd real-time-messaging-app
+cd moodchat
 ```
 
 ### 2. Install dependencies
