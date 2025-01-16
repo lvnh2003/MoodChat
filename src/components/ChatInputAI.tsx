@@ -3,29 +3,29 @@ import { FC, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import TextareaAutosize from 'react-textarea-autosize'
 import Button from './Button'
-
+import {useChat} from 'ai/react';
 interface ChatInputProps {
   chatId: string
 }
 
-const ChatInput: FC<ChatInputProps> = ({ chatId }) => {
+const ChatInputAI: FC<ChatInputProps> = ({ chatId }) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [input, setInput] = useState<string>('')
-
+  const {messages, input, handleInputChange, handleSubmit} = useChat({
+    api: '/api/message/ai',
+  })
   const sendMessage = async () => {
     if(!input) return
     setIsLoading(true)
 
     try {
-      await axios.post('/api/message/send', { text: input.trim(), chatId })
-      setInput('')
-      textareaRef.current?.focus()
-    } catch {
-      toast.error('Something went wrong. Please try again later.')
-    } finally {
+        await axios.post('/api/message/ai', { text: input.trim(), chatId })
+        textareaRef.current?.focus()
+        } catch {
+        toast.error('Sometime the responed has to be delayed, please try again later.')
+        } finally {
       setIsLoading(false)
-    }
+        }
   }
 
   return (
@@ -41,7 +41,7 @@ const ChatInput: FC<ChatInputProps> = ({ chatId }) => {
           }}
           rows={1}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           className='block w-full resize-none border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:py-1.5 sm:text-sm sm:leading-6'
         />
 
@@ -56,7 +56,7 @@ const ChatInput: FC<ChatInputProps> = ({ chatId }) => {
 
         <div className='absolute right-0 bottom-0 flex justify-between py-2 pl-3 pr-2'>
           <div className='flex-shrin-0'>
-            <Button isLoading={isLoading} onClick={sendMessage} type='submit'>
+            <Button isLoading={isLoading} onClick={handleSubmit} type='submit'>
               Post
             </Button>
           </div>
@@ -66,4 +66,4 @@ const ChatInput: FC<ChatInputProps> = ({ chatId }) => {
   )
 }
 
-export default ChatInput
+export default ChatInputAI

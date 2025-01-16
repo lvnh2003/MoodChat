@@ -106,7 +106,7 @@ const Page = () => {
         sessionId={session.user.id}
         initialMessages={initialMessages} />
 
-      <ChatInput chatPartner={chatPartner as User} chatId={chatId as string}/>
+      <ChatInput chatId={chatId as string}/>
     </div>
   );
 };
