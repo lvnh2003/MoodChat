@@ -70,6 +70,10 @@ NEXT_PUBLIC_PUSHER_APP_KEY=your-pusher-key
 NEXT_PUBLIC_PUSHER_APP_SECRET=your-pusher-secret
 NEXT_PUBLIC_PUSHER_CLUSTER=your-pusher-cluster
 
+OPENAI_API_KEY=your-api-key
+OPENAI_ENDPOINT=your-api-endpoint
+OPENAI_MODEL=your-model
+
 
 ```
 

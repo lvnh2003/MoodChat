@@ -14,19 +14,6 @@ const ChatInputAI: FC<ChatInputProps> = ({ chatId }) => {
   const {messages, input, handleInputChange, handleSubmit} = useChat({
     api: '/api/message/ai',
   })
-  const sendMessage = async () => {
-    if(!input) return
-    setIsLoading(true)
-
-    try {
-        await axios.post('/api/message/ai', { text: input.trim(), chatId })
-        textareaRef.current?.focus()
-        } catch {
-        toast.error('Sometime the responed has to be delayed, please try again later.')
-        } finally {
-      setIsLoading(false)
-        }
-  }
 
   return (
     <div className='border-t border-gray-200 px-4 pt-4 mb-2 sm:mb-0'>
@@ -36,7 +23,7 @@ const ChatInputAI: FC<ChatInputProps> = ({ chatId }) => {
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
-              sendMessage()
+              handleSubmit()
             }
           }}
           rows={1}
