@@ -8,6 +8,7 @@ import Image from "next/image";
 import Messages from "@/components/Messages";
 import ChatInput from "@/components/ChatInput";
 import { Session } from "next-auth";
+import FavoriteFriendButton from "@/components/FavoriteFriendButton";
 
 
 const Page = () => {
@@ -16,6 +17,7 @@ const Page = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [chatPartner, setChatPartner] = useState<User>();
   const [initialMessages, setInitialMessages] = useState<Message[]>([]);
+  const [isFavoriteFriend, setIsFavoriteFriend] = useState(false);
   const router = useRouter();
   const { chatId } = router.query;
   useEffect(() => {
@@ -52,8 +54,12 @@ const Page = () => {
       const chatPartnerId = user.id === userId1 ? userId2 : userId1;
 
       try {
-        const partner = await db.get(`user:${chatPartnerId}`) as User;
+        const [partner, favoriteStatus] = await Promise.all([
+          db.get(`user:${chatPartnerId}`) as Promise<User>,
+          fetchRedis("sismember", `user:${user.id}:favorite_friends`, chatPartnerId) as Promise<number>
+        ])
         setChatPartner(partner);
+        setIsFavoriteFriend(Boolean(favoriteStatus));
 
         const results: string[] = await fetchRedis(
           "zrange",
@@ -98,6 +104,9 @@ const Page = () => {
               <span className="text-sm text-gray-600">{chatPartner?.email}</span>
           </div>
         </div>
+        {chatPartner ? (
+          <FavoriteFriendButton friendId={chatPartner.id} isFavoriteByDefault={isFavoriteFriend} />
+        ) : null}
       </div>
       <Messages
         chatId={chatId as string}

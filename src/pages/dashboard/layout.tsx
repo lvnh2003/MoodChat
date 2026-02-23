@@ -10,7 +10,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { ReactNode, useEffect, useState } from 'react'
 import Loading from './loading'
-import AIChat from '@/components/AIChat'
 import { PersonStanding } from 'lucide-react'
 
 interface LayoutProps {
@@ -37,6 +36,7 @@ const Layout = ({ children}:LayoutProps) => {
   const [loading, setLoading] = useState(true);
   const [unseenRequestCount, setUnseenRequestCount] = useState<number>();
   const [friends, setFriends] = useState<User[]>()
+  const [favoriteFriendIds, setFavoriteFriendIds] = useState<string[]>([])
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -64,8 +64,12 @@ const Layout = ({ children}:LayoutProps) => {
     const fetchFriends = async () => {
       if (!session) return;
       try {
-        const data = await getFriendsByUserId(session.user.id);
+        const [data, favoriteIds] = await Promise.all([
+          getFriendsByUserId(session.user.id),
+          fetchRedis('smembers',`user:${session.user.id}:favorite_friends`) as Promise<string[]>
+        ])
         setFriends(data);
+        setFavoriteFriendIds(favoriteIds || []);
       } catch (error) {
         console.error('Error fetching friends:', error);
       }
@@ -90,7 +94,11 @@ const Layout = ({ children}:LayoutProps) => {
       <nav className='flex flex-1 flex-col'>
         <ul className='flex flex-1 flex-col gap-y-7' role='list'>
           {friends && friends?.length > 0 ? (<li>
-            <SideBarChatList friends={friends} sessionId={(session?.user.id) as string} />
+            <SideBarChatList
+              friends={friends}
+              sessionId={(session?.user.id) as string}
+              favoriteFriendIds={favoriteFriendIds}
+            />
           </li>): null}
           
           <li>

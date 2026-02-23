@@ -7,14 +7,15 @@ import UnseenChatToast from "./UnseenChatToast"
 
 interface SideBarChatListProps{
     friends: User[],
-    sessionId: string
+    sessionId: string,
+    favoriteFriendIds: string[]
 }
 
 interface ExtendedMessage extends Message{ 
     senderImg: string,
     senderName : string
 }
-const SideBarChatList = ({friends, sessionId}: SideBarChatListProps) => {
+const SideBarChatList = ({friends, sessionId, favoriteFriendIds}: SideBarChatListProps) => {
     const [unseenMessages, setUnseenMessages] = useState<Message[]>([])
     const router = useRouter()
     const pathname = usePathname()
@@ -65,10 +66,11 @@ const SideBarChatList = ({friends, sessionId}: SideBarChatListProps) => {
 
         }
     }, [pathname, sessionId, router])
-    return (
-        <ul role="list" className="max-h-[25rem] overflow-y-auto -mx-2 space-y-1">
+    const sortedFriends = [...friends].sort((a, b) => a.name.localeCompare(b.name))
+    const favoriteFriends = sortedFriends.filter((friend) => favoriteFriendIds.includes(friend.id))
+    const otherFriends = sortedFriends.filter((friend) => !favoriteFriendIds.includes(friend.id))
 
-            {friends.sort().map((friend)=>{
+    const renderFriendItem = (friend: User) => {
                 const unseenMessagesCount = unseenMessages.filter((unseenMessage)=>{
                     return unseenMessage.senderId === friend.id
                 }).length
@@ -84,7 +86,22 @@ const SideBarChatList = ({friends, sessionId}: SideBarChatListProps) => {
                         ): null}</a>
                     </li>
                 )
-            })}
+            }
+
+    return (
+        <ul role="list" className="max-h-[25rem] overflow-y-auto -mx-2 space-y-1">
+            {favoriteFriends.length > 0 ? (
+                <>
+                    <li className="px-2 pt-1 text-[11px] uppercase tracking-wide text-amber-500 font-semibold">Favorites</li>
+                    {favoriteFriends.map(renderFriendItem)}
+                </>
+            ) : null}
+            {otherFriends.length > 0 ? (
+                <>
+                    <li className="px-2 pt-1 text-[11px] uppercase tracking-wide text-gray-400 font-semibold">All chats</li>
+                    {otherFriends.map(renderFriendItem)}
+                </>
+            ) : null}
         </ul>
     )
 }
